@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Barcode Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #007BFF;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input[type="file"], select, input[type="color"], button {
+            margin-top: 10px;
+            display: block;
+            width: 100%;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #output {
+            margin-top: 20px;
+        }
+        #downloadLink {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+/* Footer and label for link */
+
+.label-download {
+    color: rgb(0, 209, 157); /* Change link text color to white */
+    text-decoration: none; /* Optional: remove underline */
+}
+a {
+    color: white; /* Change link text color to white */
+    text-decoration: none; /* Optional: remove underline */
+}
+
+/* Optional: Change link color on hover */
+a:hover {
+    text-decoration: underline; /* Optional: underline on hover */
+}
+    </style>
+</head>
+<body>
+    <h1>Bulk Barcode Generator (CODE128)</h1>
+    <div class="container">
+        <h3>Import .csv data</h3>
+        <input type="file" id="csvFile" accept=".csv" />
+        <label for="formatSelect">Output Format:</label>
+        <select id="formatSelect">
+            <option value="svg">SVG</option>
+            <option value="png">PNG</option>
+        </select>
+        
+        <label for="colorPicker">Barcode Color:</label>
+        <input type="color" id="colorPicker" value="#000000" />
+        
+        <button id="generateBtn">Generate Barcodes</button>
+        <div id="output"></div>
+        <a id="downloadLink" style="display:none">Download ZIP</a>
+        <h2>Download Sample Data</h2>
+
+    <a class="label-download" href="Barcode 128 Sample Data.csv" download="Barcode 128 Sample Data.csv">Download File</a>
+    <div class="footer">
+        &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
+    </div>
+
+    </div>
+
+    <!-- Include necessary libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+
+    <script>
+        document.getElementById('generateBtn').addEventListener('click', function () {
+            const fileInput = document.getElementById('csvFile').files[0];
+            if (!fileInput) {
+                alert("Please upload a CSV file!");
+                return;
+            }
+
+            const format = document.getElementById('formatSelect').value;
+            const color = document.getElementById('colorPicker').value;
+
+            Papa.parse(fileInput, {
+                header: false,
+                dynamicTyping: true,
+                complete: function(results) {
+                    const data = results.data;
+                    generateBarcodes(data, format, color);
+                }
+            });
+        });
+
+        async function generateBarcodes(data, format, color) {
+            const zip = new JSZip();
+            const svgNamespace = "http://www.w3.org/2000/svg";
+            const promises = [];
+
+            data.forEach((row, index) => {
+                if (row[0] && row[0].toString().length > 0) {
+                    if (format === 'svg') {
+                        const svg = document.createElementNS(svgNamespace, "svg");
+                        JsBarcode(svg, row[0], { format: "CODE128", lineColor: color });
+
+                        const svgData = new XMLSerializer().serializeToString(svg);
+                        zip.file(`${row[0]}.svg`, svgData);
+                    } else if (format === 'png') {
+                        const canvas = document.createElement('canvas');
+                        JsBarcode(canvas, row[0], { format: "CODE128", lineColor: color });
+
+                        const promise = new Promise((resolve) => {
+                            canvas.toBlob(function(blob) {
+                                zip.file(`${row[0]}.png`, blob);
+                                resolve();
+                            });
+                        });
+                        promises.push(promise);
+                    }
+                } else {
+                    console.warn(`Row ${index + 1} is invalid or empty`);
+                }
+            });
+
+            await Promise.all(promises);
+
+            zip.generateAsync({ type: "blob" }).then(function (content) {
+                const downloadLink = document.getElementById("downloadLink");
+                downloadLink.href = URL.createObjectURL(content);
+                downloadLink.download = "barcodes.zip";
+                downloadLink.style.display = "block";
+                downloadLink.innerText = "Download ZIP File";
+            });
+        }
+    </script>
+</body>
+</html>

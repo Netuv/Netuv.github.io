@@ -1,0 +1,14 @@
+FirstName,LastName,Title,URL,Email,WorkPhone,HomePhone,Street,City,State,Zipcode,Country
+Sarah,Johnson,Project Manager,https://www.example.com,Sarah.Johnson@example.com,62895123456789,6222334455,"123 Elm St, Apt 4B",New York,NY,10001,USA
+Liam,Smith,Data Analyst,https://www.example.com,Liam.Smith@example.com,62895765432100,6222445566,"456 Maple Ave",Los Angeles,CA,90001,USA
+Olivia,Brown,Marketing Director,https://www.example.com,Olivia.Brown@example.com,62896789012345,6222556677,"789 Pine Rd, Suite 12",Chicago,IL,60601,USA
+Noah,Davis,Software Engineer,https://www.example.com,Noah.Davis@example.com,62891234567890,6222667788,"321 Oak Dr",Houston,TX,77001,USA
+Emma,Wilson,HR Specialist,https://www.example.com,Emma.Wilson@example.com,62893456789012,6222778899,"654 Cedar Blvd",Phoenix,AZ,85001,USA
+Lucas,Martinez,Finance Manager,https://www.example.com,Lucas.Martinez@example.com,62894567890123,6222889900,"987 Birch St",Philadelphia,PA,19101,USA
+Mia,García,Customer Service Rep,https://www.example.com,Mia.Garcia@example.com,62895678901234,6222990011,"234 Spruce Ln",San Antonio,TX,78201,USA
+Ethan,Anderson,Product Designer,https://www.example.com,Ethan.Anderson@example.com,62897890123456,6222112233,"567 Willow Way",San Diego,CA,92101,USA
+Sophia,Lopez,Sales Executive,https://www.example.com,Sophia.Lopez@example.com,62898901234567,6222223344,"890 Fir Ct",Dallas,TX,75201,USA
+Aiden,Thompson,Network Administrator,https://www.example.com,Aiden.Thompson@example.com,62899012345678,6222334455,"123 Poplar Pl",San Jose,CA,95101,USA
+Isabella,White,Content Strategist,https://www.example.com,Isabella.White@example.com,62890123456789,6222445566,"456 Walnut St",Austin,TX,73301,USA
+Mason,Jackson,Research Scientist,https://www.example.com,Mason.Jackson@example.com,62891234567890,6222556677,"789 Cherry Ave",Seattle,WA,98101,USA
+Amalia Putri,Nirwandhani,Sustainability Officer,https:/www.tripatra.com,Amalia.Nirwandhani@tripatra.com,62895410414445,6229770700,"JL.Boulevard Bintaro Jaya Blok B7/A6 Sektor VII, Bintaro Jaya",Tangerang Selatan,Tangerang,15424,Indonesia

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Generator</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: #fff;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .label-download {
+    color: rgb(0, 209, 157); /* Change link text color to white */
+    text-decoration: none; /* Optional: remove underline */
+}
+.footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+a {
+    color: white; /* Change link text color to white */
+    text-decoration: none; /* Optional: remove underline */
+}
+
+/* Optional: Change link color on hover */
+a:hover {
+    text-decoration: underline; /* Optional: underline on hover */
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <label for="startNumber">Start Number:</label>
+    <input type="number" id="startNumber" value="1" min="1" required>
+
+    <label for="endNumber">End Number:</label>
+    <input type="number" id="endNumber" value="100" min="1" required>
+
+    <label for="digitEditor">Number of Digits:</label>
+    <input type="number" id="digitEditor" value="3" min="1" required>
+
+    <label for="fileName">File Name:</label>
+    <input type="text" id="fileName" readonly>
+
+    <button onclick="generateCSV()">Generate CSV</button>
+
+    <!-- Footer ============================================ -->
+    <div class="footer">
+      &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
+  </div>
+  <!-- End Footer ============================================ -->
+
+
+  </div>
+
+  <script>
+    function generateCSV() {
+      const startNumber = document.getElementById('startNumber').valueAsNumber;
+      const endNumber = document.getElementById('endNumber').valueAsNumber;
+      const digitEditor = document.getElementById('digitEditor').valueAsNumber;
+
+      const fileName = `${String(startNumber).padStart(digitEditor, '0')}-${String(endNumber).padStart(digitEditor, '0')}.csv`;
+      document.getElementById('fileName').value = fileName;
+
+      const csvContent = convertRangeToCSV(startNumber, endNumber, digitEditor);
+      downloadCSV(csvContent, fileName);
+    }
+
+    function convertRangeToCSV(startNumber, endNumber, digitEditor) {
+      let csv = 'Number\n';
+      for (let i = startNumber; i <= endNumber; i++) {
+        const paddedNumber = String(i).padStart(digitEditor, '0');
+        const csvRow = `"${paddedNumber}"\n`;
+        csv += csvRow;
+      }
+      return csv;
+    }
+
+    function downloadCSV(csvData, fileName) {
+      const csvContent = 'data:text/csv;charset=utf-8,' + encodeURI(csvData);
+      const link = document.createElement('a');
+      link.setAttribute('href', csvContent);
+      link.setAttribute('download', fileName);
+      link.click();
+    }
+  </script>
+
+</body>
+</html>

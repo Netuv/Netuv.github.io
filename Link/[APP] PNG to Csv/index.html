@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Convert PNG to CSV</title>
+  <script src="script.js"></script>
+</head>
+
+<style>
+
+.label-download {
+    color: rgb(0, 209, 157); /* Change link text color to white */
+    text-decoration: none; /* Optional: remove underline */
+}
+.footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+a {
+    color: white; /* Change link text color to white */
+    text-decoration: none; /* Optional: remove underline */
+}
+
+/* Optional: Change link color on hover */
+a:hover {
+    text-decoration: underline; /* Optional: underline on hover */
+}
+
+</style>
+
+<body>
+  <h1>Convert to CSV</h1>
+<p>Add bulk of PNG on here e.g 001.png, 002.png, 00...png etc. </p>
+  <input type="file" id="fileInput" multiple>
+  <button onclick="convertToCSV()">Convert</button>
+  <h2>Download Sample Data</h2>
+    <a class="label-download" href="PNG Sample Data.zip" download="PNG Sample Data.zip">Download File</a>
+     <!-- Footer ============================================ -->
+  <div class="footer">
+    &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
+</div>
+<!-- End Footer ============================================ -->
+</body>
+</html>

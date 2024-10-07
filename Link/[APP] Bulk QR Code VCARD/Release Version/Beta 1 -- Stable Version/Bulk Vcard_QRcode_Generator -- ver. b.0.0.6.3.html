@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Bulk VCard QR Code Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+    <script src="https://cdn.rawgit.com/neocotic/qrious/v4.0.2/dist/qrious.min.js"></script>
+</head>
+<body>
+    <h1>Bulk VCard QR Code Generator</h1>
+    <input type="file" id="csvFile" accept=".csv">
+    <button onclick="generateQR()">Generate QR Codes</button>
+    <br>
+    <h2>Download Sample Data</h2>
+    <a class="label-download" href="Vcard Sample Data.csv" download="Vcard Sample Data.csv">Download File</a>
+
+     <!-- Footer ============================================ -->
+     <div class="footer">
+        &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
+    </div>
+    <!-- End Footer ============================================ -->
+
+    <script>
+        function generateQR() {
+            var fileInput = document.getElementById('csvFile');
+            var file = fileInput.files[0];
+
+            if (file) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    var csvData = e.target.result;
+                    var rows = csvData.split('\n');
+                    var zip = new JSZip();
+
+                    // Counter to track the number of generated QR codes
+                    var generateCount = 0;
+
+                    // Data array to store information for the CSV
+                    var csvDataArray = [];
+
+                    // Loop through each row in the CSV, starting from index 1 to skip the header row
+                    for (var i = 1; i < rows.length; i++) {
+                        var rowData = rows[i].split(',');
+
+                        // Assuming the CSV format is: FirstName,Lastname,Title,URL,Email,WorkPhone,HomePhone,Street,City,State,Zipcode,Country
+                        var firstName = rowData[0];
+                        var lastName = rowData[1];
+                        var title = rowData[2];
+                        var url = rowData[3];
+                        var email = rowData[4];
+                        var workPhone = rowData[6];
+                        var homePhone = rowData[5];
+                        var street = rowData[7];
+                        var city = rowData[8];
+                        var state = rowData[9];
+                        var zipcode = rowData[10];
+                        var country = rowData[11];
+
+                        // Create Full Name by combining First Name and Last Name
+                        var fullName = firstName + ' ' + lastName;
+
+                        // Create a VCard string
+                        var vCardData = `BEGIN:VCARD
+VERSION:3.0
+FN:${fullName}
+N:${lastName};${firstName}
+TITLE:${title}
+URL:${url}
+EMAIL;TYPE=INTERNET:${email}
+TEL;TYPE=voice,work,pref:${workPhone}
+TEL;TYPE=voice,home,pref:${homePhone}
+ADR:;;${street};${city};${state};${zipcode};${country}
+END:VCARD`;
+
+                        // Create a QR code using qrious
+                        var qr = new QRious({
+                            value: vCardData,
+                            size: 1200,
+                        });
+
+                        // Convert the QR code to a data URL
+                        var qrDataURL = qr.toDataURL();
+
+                        // Add the QR code image to the zip file without numbering and underscores
+                        zip.file(`${firstName}${lastName}.png`, dataURLtoBlob(qrDataURL));
+
+                        // Add data to the array for the CSV
+                        csvDataArray.push({
+                            FullName: fullName,
+                            QRCodeFilename: `${firstName}${lastName}.png`
+                        });
+
+                        // Increment the generate count
+                        generateCount++;
+
+                        // Check if all QR codes have been generated before creating the zip file
+                        if (generateCount === rows.length - 1) {
+                            // Add the CSV file to the zip
+                            var csvContent = "FullName,QRCodeFilename\n";
+                            csvDataArray.forEach(function (data) {
+                                csvContent += `${data.FullName},${data.QRCodeFilename}\n`;
+                            });
+                            zip.file("qrcode_data.csv", csvContent);
+
+                            // Generate the zip file and trigger the download
+                            zip.generateAsync({ type: "blob" })
+                                .then(function (content) {
+                                    // Create a download link
+                                    var link = document.createElement('a');
+                                    link.href = URL.createObjectURL(content);
+                                    link.download = 'vcard_qrcodes.zip';
+                                    link.click();
+                                });
+                        }
+                    }
+                };
+
+                reader.readAsText(file);
+            } else {
+                alert('Please select a CSV file.');
+            }
+        }
+
+        // Function to convert data URL to Blob
+        function dataURLtoBlob(dataURL) {
+            var arr = dataURL.split(',');
+            var mime = arr[0].match(/:(.*?);/)[1];
+            var bstr = atob(arr[1]);
+            var n = bstr.length;
+            var u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], { type: mime });
+        }
+    </script>
+</body>
+</html>

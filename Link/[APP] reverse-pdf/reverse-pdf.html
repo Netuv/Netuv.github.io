@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reverse PDF Pages</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+</head>
+
+<style>
+
+.label-download {
+    color: rgb(0, 209, 157); /* Change link text color to white */
+    text-decoration: none; /* Optional: remove underline */
+}
+.footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+a {
+    color: white; /* Change link text color to white */
+    text-decoration: none; /* Optional: remove underline */
+}
+
+/* Optional: Change link color on hover */
+a:hover {
+    text-decoration: underline; /* Optional: underline on hover */
+}
+
+</style>
+
+<body>
+    <h1>Reverse PDF Pages in Sets</h1>
+    <p>Sometimes it is necessary to reverse (mirror) and adjust a few pages to create a double-sided document. 
+    <br> For example, Original: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 becomes: 6, 5, 4, 3, 2, 1, 12, 11, 10, 9, 8, 7.</p>
+    <input type="file" id="file-input" accept="application/pdf" />
+    <label for="chunk-size">Chunk Size:</label>
+    <input type="number" id="chunk-size" value="6" min="1" />
+    <button id="reverse-button">Reverse Pages</button>
+    <button id="toggle-preview-button" style="display: none;">Hide Preview</button>
+    <a id="download-button" style="display: none;" download="reversed.pdf">Download PDF</a>
+    <br>
+    <iframe id="output" style="width: 100%; height: 500px; display: none;"></iframe>
+    <h2>Download Sample Data</h2>
+    <a class="label-download" href="Reverse Data Sample.pdf" target="_blank" download="Reverse Data Sample.pdf">Download File</a>
+ <!-- Footer ============================================ -->
+ <div class="footer">
+    &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
+</div>
+<!-- End Footer ============================================ -->
+    <script>
+        let pdfBlob;
+
+        document.getElementById('reverse-button').addEventListener('click', async () => {
+            const fileInput = document.getElementById('file-input');
+            const chunkSize = parseInt(document.getElementById('chunk-size').value);
+
+            if (fileInput.files.length === 0) {
+                alert("Please select a PDF file.");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            const totalPages = pdfDoc.getPageCount();
+            const newPdfDoc = await PDFLib.PDFDocument.create();
+
+            // Process in chunks of specified size
+            for (let i = 0; i < totalPages; i += chunkSize) {
+                const chunk = [];
+                for (let j = 0; j < chunkSize && (i + j) < totalPages; j++) {
+                    chunk.push(i + j); // Store the indices of the pages
+                }
+                // Add pages in reversed order
+                for (let k = chunk.length - 1; k >= 0; k--) {
+                    const pageIndex = chunk[k];
+                    const [copiedPage] = await newPdfDoc.copyPages(pdfDoc, [pageIndex]);
+                    newPdfDoc.addPage(copiedPage);
+                }
+            }
+
+            // Save the new PDF
+            const pdfBytes = await newPdfDoc.save();
+            pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(pdfBlob);
+
+            // Show the output and download button
+            document.getElementById('output').src = url;
+            document.getElementById('output').style.display = 'block';
+            document.getElementById('download-button').style.display = 'inline';
+            document.getElementById('toggle-preview-button').style.display = 'inline';
+            document.getElementById('download-button').href = url; // Set the download link
+        });
+
+        document.getElementById('toggle-preview-button').addEventListener('click', () => {
+            const iframe = document.getElementById('output');
+            const button = document.getElementById('toggle-preview-button');
+            if (iframe.style.display === 'none') {
+                iframe.style.display = 'block';
+                button.textContent = 'Hide Preview';
+            } else {
+                iframe.style.display = 'none';
+                button.textContent = 'Show Preview';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+body {
+  text-align: center;
+}
+
+h1 {
+  margin-top: 50px;
+}
+
+button {
+  margin-top: 20px;
+}
+
+/* Footer Style ------------------------------------ */
+    
+.footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+}
+
+a {
+  color: white; /* Change link text color to white */
+  text-decoration: none; /* Optional: remove underline */
+}
+
+/* Optional: Change link color on hover */
+a:hover {
+  text-decoration: underline; /* Optional: underline on hover */
+}
+
+/* Footer Style ------------------------------------ */

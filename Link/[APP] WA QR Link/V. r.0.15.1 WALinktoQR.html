@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        input[type="file"] {
+            margin: 20px 0;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #status {
+            margin: 20px 0;
+            font-size: 16px;
+        }
+
+        label {
+            display: block;
+            margin: 20px 0;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        #manualInput, #csvInput {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .label-download {
+    color: rgb(0, 209, 157); /* Change link text color to white */
+    text-decoration: none; /* Optional: remove underline */
+}
+.footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+a {
+    color: white; /* Change link text color to white */
+    text-decoration: none; /* Optional: remove underline */
+}
+
+/* Optional: Change link color on hover */
+a:hover {
+    text-decoration: underline; /* Optional: underline on hover */
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Whatsapp QR Code Generator</h1>
+        <label>
+            <input type="radio" name="mode" value="manual" id="manualMode">
+            Generate QR Code from single number
+        </label>
+        <label>
+            <input type="radio" name="mode" value="bulk" id="bulkMode">
+            Generate QR Codes from CSV
+        </label>
+
+        <div id="manualInput">
+            <input type="text" id="manualPhone" placeholder="(e.g., 628558000) use 62" />
+        </div>
+
+        <div id="csvInput">
+            <input type="file" id="fileInput" accept=".csv">
+        </div>
+
+        <label>
+            <input type="checkbox" id="logoSwitch" checked>
+            Include logo in QR codes
+        </label>
+
+        <button id="generateBtn">Generate QR Codes</button>
+        <h3>Download Sample Data</h3>
+    <a class="label-download" href="WA to QR data sample .csv" download="WA to QR data sample .csv">Download File</a>
+        <div id="status"></div>
+         <!-- Footer ============================================ -->
+  <div class="footer">
+    &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
+</div>
+<!-- End Footer ============================================ -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const manualMode = document.getElementById('manualMode');
+            const bulkMode = document.getElementById('bulkMode');
+            const manualInput = document.getElementById('manualInput');
+            const csvInput = document.getElementById('csvInput');
+
+            manualMode.addEventListener('change', () => {
+                manualInput.style.display = 'block';
+                csvInput.style.display = 'none';
+            });
+
+            bulkMode.addEventListener('change', () => {
+                manualInput.style.display = 'none';
+                csvInput.style.display = 'block';
+            });
+
+            document.getElementById('generateBtn').addEventListener('click', () => {
+                if (manualMode.checked) {
+                    handleManualInput();
+                } else if (bulkMode.checked) {
+                    handleBulkCSVInput();
+                }
+            });
+        });
+
+        async function handleManualInput() {
+            const phoneNumber = document.getElementById('manualPhone').value.trim();
+            if (!phoneNumber) {
+                alert('Please enter a phone number.');
+                return;
+            }
+
+            const includeLogo = document.getElementById('logoSwitch').checked;
+            document.getElementById('status').innerText = 'Processing...';
+            console.log('Generating QR code for phone number:', phoneNumber);
+
+            try {
+                const zip = new JSZip();
+                const csvDataArray = [];
+                const whatsappUrl = `https://wa.me/${phoneNumber}`;
+                await generateQRCode(whatsappUrl, zip, csvDataArray, includeLogo, phoneNumber);
+
+                const csvContent = "FullName,QRCodeFilename\n" + csvDataArray.map(data => `${data.FullName},${data.QRCodeFilename}`).join('\n');
+                zip.file("qrcode_data.csv", csvContent);
+
+                const zipContent = await zip.generateAsync({ type: "blob" });
+                console.log('ZIP file generated, size:', zipContent.size);
+
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(zipContent);
+                link.download = 'qrcodes.zip';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                document.getElementById('status').innerText = 'Download ready!';
+                console.log('ZIP file ready for download');
+            } catch (error) {
+                document.getElementById('status').innerText = 'Error occurred.';
+                console.error('Error occurred:', error);
+            }
+        }
+
+        async function handleBulkCSVInput() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please upload a CSV file first.');
+                return;
+            }
+
+            const includeLogo = document.getElementById('logoSwitch').checked;
+            document.getElementById('status').innerText = 'Processing...';
+            console.log('Processing CSV file:', file.name);
+
+            try {
+                const zip = new JSZip();
+                const csvDataArray = [];
+                const csvData = await file.text();
+                console.log('CSV Data:', csvData);
+                const lines = csvData.trim().split('\n');
+                for (let i = 1; i < lines.length; i++) { // Skip header row
+                    const [name, number] = lines[i].split(',').map(s => s.trim());
+                    if (name && number) {
+                        const whatsappUrl = `https://wa.me/${number}`;
+                        console.log('Generating QR code for:', whatsappUrl);
+                        await generateQRCode(whatsappUrl, zip, csvDataArray, includeLogo, name);
+                    }
+                }
+
+                const csvContent = "FullName,QRCodeFilename\n" + csvDataArray.map(data => `${data.FullName},${data.QRCodeFilename}`).join('\n');
+                zip.file("qrcode_data.csv", csvContent);
+
+                const zipContent = await zip.generateAsync({ type: "blob" });
+                console.log('ZIP file generated, size:', zipContent.size);
+
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(zipContent);
+                link.download = 'qrcodes.zip';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                document.getElementById('status').innerText = 'Download ready!';
+                console.log('ZIP file ready for download');
+            } catch (error) {
+                document.getElementById('status').innerText = 'Error occurred.';
+                console.error('Error occurred:', error);
+            }
+        }
+
+        async function generateQRCode(url, zip, csvDataArray, includeLogo, name) {
+            try {
+                const qrCodeURL = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(url)}&size=400x400`;
+                console.log('Fetching QR code from API:', qrCodeURL);
+                const qrCodeBlob = await fetch(qrCodeURL).then(res => res.blob());
+                console.log('QR code fetched, blob size:', qrCodeBlob.size);
+
+                if (includeLogo) {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const qrCodeImage = new Image();
+                    const logoUrl = 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg';
+                    const logoImage = new Image();
+
+                    qrCodeImage.src = URL.createObjectURL(qrCodeBlob);
+                    logoImage.src = logoUrl;
+
+                    await new Promise((resolve, reject) => {
+                        qrCodeImage.onload = resolve;
+                        qrCodeImage.onerror = reject;
+                        logoImage.onload = resolve;
+                        logoImage.onerror = reject;
+                    });
+
+                    canvas.width = qrCodeImage.width;
+                    canvas.height = qrCodeImage.height;
+                    ctx.drawImage(qrCodeImage, 0, 0);
+
+                    const logoCanvas = document.createElement('canvas');
+                    const logoCtx = logoCanvas.getContext('2d');
+                    logoCanvas.width = qrCodeImage.width;
+                    logoCanvas.height = qrCodeImage.height;
+
+                    const logoSize = qrCodeImage.width / 3.4;
+                    const logoX = (qrCodeImage.width - logoSize) / 2;
+                    const logoY = (qrCodeImage.height - logoSize) / 2;
+
+                    const svgResponse = await fetch(logoUrl);
+                    const svgText = await svgResponse.text();
+                    const svgImage = new Image();
+                    svgImage.src = 'data:image/svg+xml;base64,' + btoa(svgText);
+
+                    await new Promise((resolve, reject) => {
+                        svgImage.onload = resolve;
+                        svgImage.onerror = reject;
+                    });
+
+                    logoCtx.drawImage(svgImage, logoX, logoY, logoSize, logoSize);
+                    const logoBlob = await new Promise((resolve, reject) => logoCanvas.toBlob(resolve, 'image/png', 1.0));
+
+                    if (!logoBlob) {
+                        throw new Error('Failed to convert logo to PNG');
+                    }
+
+                    const logoPng = new Image();
+                    logoPng.src = URL.createObjectURL(logoBlob);
+                    await new Promise((resolve, reject) => {
+                        logoPng.onload = resolve;
+                        logoPng.onerror = reject;
+                    });
+                    ctx.drawImage(logoPng, 0, 0);
+
+                    const qrCodeWithLogoBlob = await new Promise((resolve, reject) => canvas.toBlob(resolve, 'image/png', 1.0));
+                    if (!qrCodeWithLogoBlob) {
+                        throw new Error('Failed to convert canvas to PNG');
+                    }
+                    zip.file(`${name}_.png`, qrCodeWithLogoBlob);
+                    console.log('QR code with logo generated and added to ZIP:', `${name}_.png`);
+                } else {
+                    zip.file(`${name}_.png`, qrCodeBlob);
+                    console.log('QR code without logo generated and added to ZIP:', `${name}_.png`);
+                }
+
+                csvDataArray.push({
+                    FullName: name,
+                    QRCodeFilename: `${name}_.png`
+                });
+            } catch (error) {
+                console.error('Error generating QR code:', error);
+                throw error;
+            }
+        }
+    </script>
+</body>
+</html>
