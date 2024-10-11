@@ -1,3 +1,4 @@
+
 # Netuv CSV Manager and QR Generator
 
 ## Overview
@@ -44,6 +45,11 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 
 This project is licensed under the MIT License. See the LICENSE file for more details.
 
-## Contact
+## Contact & Support
+***We Appreciate Your Support!*** 
+
+<a href="https://trakteer.id/netuv/tip" target="blank">
+  <img src=https://trakteer-bedesk.s3.ap-southeast-1.amazonaws.com/storage/branding_media/lmWrnYB222t4UieTIowhHr44C1oDJkoSmtEVonF7.png alt="@netuv" width="200" />
+</a>
 
 For any questions or suggestions, feel free to open an issue in the GitHub repository.
