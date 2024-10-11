@@ -53,7 +53,14 @@
             background-color: black;
             color: white;
         }
-
+        .container {
+            background: #fff;
+            border: solid #000;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
         .footer {
             position: relative;
             bottom: 0;
@@ -85,21 +92,22 @@
 </head>
 <body>
     <h1>Reverse PDF Pages in Sets</h1>
-    <p>Sometimes it is necessary to reverse (mirror) and adjust a few pages to create a double-sided document. 
-    <br> For example, Original: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 becomes: 6, 5, 4, 3, 2, 1, 12, 11, 10, 9, 8, 7.</p>
-    
-    <input type="file" id="file-input" accept="application/pdf" />
-    <label for="chunk-size">Chunk Size:</label>
-    <input type="number" id="chunk-size" value="6" min="1" />
-    
-    <button id="reverse-button">Reverse Pages</button>
-    <button id="toggle-preview-button" style="display: none;">Hide Preview</button>
-    
-    <a id="download-button" style="display: none;" download="reversed.pdf">Download PDF</a>
-    
-    <br>
-    <iframe id="output"></iframe>
-    
+    <div class="container">
+        <p>Sometimes it is necessary to reverse (mirror) and adjust a few pages to create a double-sided document. 
+            <br> For example, Original: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 becomes: 6, 5, 4, 3, 2, 1, 12, 11, 10, 9, 8, 7.</p>
+            
+            <input type="file" id="file-input" accept="application/pdf" />
+            <label for="chunk-size">Chunk Size:</label>
+            <input type="number" id="chunk-size" value="6" min="1" />
+            
+            <button id="reverse-button">Reverse Pages</button>
+            <button id="toggle-preview-button" style="display: none;">Hide Preview</button>
+            
+            <a id="download-button" style="display: none;" download="reversed.pdf">Download PDF</a>
+            
+            <br>
+            <iframe id="output"></iframe>
+    </div>
     <h2>Download Sample Data</h2>
     <a class="label-download" href="Reverse Data Sample.pdf" target="_blank" download="Reverse Data Sample.pdf">Download File</a>
     
