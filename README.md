@@ -5,6 +5,15 @@
 
 The **Netuv CSV Manager and QR Generator** is an all-in-one web-based tool designed for easy management of CSV files and generation of QR codes. This application simplifies data handling and enhances user experience with its intuitive interface.
 
+## Contact & Support
+***We Appreciate Your Support!*** 
+
+<a href="https://trakteer.id/netuv/tip" target="_blank">
+  <img src=https://trakteer-bedesk.s3.ap-southeast-1.amazonaws.com/storage/branding_media/lmWrnYB222t4UieTIowhHr44C1oDJkoSmtEVonF7.png alt="@netuv" width="200" />
+</a>
+
+For any questions or suggestions, feel free to open an issue in the GitHub repository.
+
 ## Features
 
 -   **CSV Management**:
@@ -44,12 +53,3 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for more details.
-
-## Contact & Support
-***We Appreciate Your Support!*** 
-
-<a href="https://trakteer.id/netuv/tip" target="_blank">
-  <img src=https://trakteer-bedesk.s3.ap-southeast-1.amazonaws.com/storage/branding_media/lmWrnYB222t4UieTIowhHr44C1oDJkoSmtEVonF7.png alt="@netuv" width="200" />
-</a>
-
-For any questions or suggestions, feel free to open an issue in the GitHub repository.
