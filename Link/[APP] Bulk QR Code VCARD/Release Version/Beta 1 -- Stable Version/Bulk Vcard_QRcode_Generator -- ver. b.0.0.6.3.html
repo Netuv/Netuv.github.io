@@ -3,26 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
     <title>Bulk VCard QR Code Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
     <script src="https://cdn.rawgit.com/neocotic/qrious/v4.0.2/dist/qrious.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #000000;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="file"],
+        button, 
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #000000;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #000000;
+            color: #ffffff;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: #333333;
+        }
+        .preview {
+            margin-top: 20px;
+        }
+        canvas {
+            border: 1px solid #000000;
+        }
+        .manual-input {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .manual-input > div {
+            flex: 1 1 30%;
+            margin-right: 10px;
+        }
+        .manual-input > div:last-child {
+            margin-right: 0;
+        }
+        .footer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+        .download-button {
+    display: inline-block;               /* Make the link behave like a block element */
+    padding: 10px 20px;                 /* Add padding for better touch area */
+    margin: 10px 0;                     /* Margin for spacing around the button */
+    border: 2px solid #000;             /* Solid border around the button */
+    background-color: rgb(255, 255, 255);             /* Black background color */
+    color: rgb(0, 0, 0);                        /* White text color */
+    text-align: center;                  /* Center align the text */
+    text-decoration: none;               /* Remove underline from the link */
+    border-radius: 5px;                 /* Rounded corners */
+    cursor: pointer;                     /* Change cursor to pointer on hover */
+    transition: background-color 0.3s;  /* Smooth transition for hover effect */
+}
+
+.download-button:hover {
+    background-color: #333;             /* Change background color on hover */
+}
+        a {
+            color: rgb(255, 255, 255);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+            .manual-input > div {
+                flex: 1 1 100%;
+                margin-right: 0;
+            }    
+        }
+    </style>
 </head>
 <body>
-    <h1>Bulk VCard QR Code Generator</h1>
-    <input type="file" id="csvFile" accept=".csv">
-    <button onclick="generateQR()">Generate QR Codes</button>
-    <br>
-    <h2>Download Sample Data</h2>
-    <a class="label-download" href="Vcard Sample Data.csv" download="Vcard Sample Data.csv">Download File</a>
-
-     <!-- Footer ============================================ -->
-     <div class="footer">
+    <div class="footer">
         &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
     </div>
-    <!-- End Footer ============================================ -->
-
+    <br>
+    <br>
+    <h1>Bulk VCard (Contact) QR Code Generator</h1>
+    
+    <h2>Upload CSV</h2>
+    <input type="file" id="csvFile" accept=".csv">
+    <a href="Vcard Sample Data.csv" download="Vcard Sample Data.csv" class="download-button">
+        Download Sample CSV Data
+    </a>
+    <button onclick="generateQR()">Generate QR Codes</button>
+    
+    <h2>Manual Input</h2>
+    <form id="manualInputForm">
+        <div class="manual-input">
+            <div>
+                <input type="text" id="firstName" placeholder="First Name" required>
+                <input type="text" id="lastName" placeholder="Last Name" required>
+                <input type="text" id="title" placeholder="Title">
+            </div>
+            <div>
+                <input type="text" id="url" placeholder="URL">
+                <input type="email" id="email" placeholder="Email">
+                <input type="text" id="workPhone" placeholder="Work Phone">
+            </div>
+            <div>
+                <input type="text" id="homePhone" placeholder="Home Phone">
+                <input type="text" id="street" placeholder="Street">
+                <input type="text" id="city" placeholder="City">
+            </div>
+            <div>
+                <input type="text" id="state" placeholder="State">
+                <input type="text" id="zipcode" placeholder="Zip Code">
+                <input type="text" id="country" placeholder="Country">
+            </div>
+        </div>
+        <button type="button" onclick="generateManualQR()">Generate Manual QR Code</button>
+    </form>
+    
+    <div class="preview">
+        <h3>QR Code Preview</h3>
+        <canvas id="qrPreview"></canvas>
+        <p>File Format </p>
+        <select id="fileFormat">
+            <option value="png">PNG</option>
+            <option value="svg">SVG</option>
+        </select>
+        <p>Image Size :</p> <input type="number" id="qrSize" value="300" min="100" max="1200" placeholder="Size (100-1200)">
+        <button id="downloadButton" onclick="downloadQR()">Download QR Code</button>
+    </div>
+    
     <script>
+        let currentQR;
+
         function generateQR() {
             var fileInput = document.getElementById('csvFile');
             var file = fileInput.files[0];
@@ -34,18 +167,11 @@
                     var csvData = e.target.result;
                     var rows = csvData.split('\n');
                     var zip = new JSZip();
-
-                    // Counter to track the number of generated QR codes
-                    var generateCount = 0;
-
-                    // Data array to store information for the CSV
                     var csvDataArray = [];
 
-                    // Loop through each row in the CSV, starting from index 1 to skip the header row
                     for (var i = 1; i < rows.length; i++) {
                         var rowData = rows[i].split(',');
 
-                        // Assuming the CSV format is: FirstName,Lastname,Title,URL,Email,WorkPhone,HomePhone,Street,City,State,Zipcode,Country
                         var firstName = rowData[0];
                         var lastName = rowData[1];
                         var title = rowData[2];
@@ -59,10 +185,8 @@
                         var zipcode = rowData[10];
                         var country = rowData[11];
 
-                        // Create Full Name by combining First Name and Last Name
                         var fullName = firstName + ' ' + lastName;
 
-                        // Create a VCard string
                         var vCardData = `BEGIN:VCARD
 VERSION:3.0
 FN:${fullName}
@@ -75,47 +199,29 @@ TEL;TYPE=voice,home,pref:${homePhone}
 ADR:;;${street};${city};${state};${zipcode};${country}
 END:VCARD`;
 
-                        // Create a QR code using qrious
                         var qr = new QRious({
                             value: vCardData,
                             size: 1200,
                         });
 
-                        // Convert the QR code to a data URL
                         var qrDataURL = qr.toDataURL();
-
-                        // Add the QR code image to the zip file without numbering and underscores
                         zip.file(`${firstName}${lastName}.png`, dataURLtoBlob(qrDataURL));
-
-                        // Add data to the array for the CSV
-                        csvDataArray.push({
-                            FullName: fullName,
-                            QRCodeFilename: `${firstName}${lastName}.png`
-                        });
-
-                        // Increment the generate count
-                        generateCount++;
-
-                        // Check if all QR codes have been generated before creating the zip file
-                        if (generateCount === rows.length - 1) {
-                            // Add the CSV file to the zip
-                            var csvContent = "FullName,QRCodeFilename\n";
-                            csvDataArray.forEach(function (data) {
-                                csvContent += `${data.FullName},${data.QRCodeFilename}\n`;
-                            });
-                            zip.file("qrcode_data.csv", csvContent);
-
-                            // Generate the zip file and trigger the download
-                            zip.generateAsync({ type: "blob" })
-                                .then(function (content) {
-                                    // Create a download link
-                                    var link = document.createElement('a');
-                                    link.href = URL.createObjectURL(content);
-                                    link.download = 'vcard_qrcodes.zip';
-                                    link.click();
-                                });
-                        }
+                        csvDataArray.push({ FullName: fullName, QRCodeFilename: `${firstName}${lastName}.png` });
                     }
+
+                    var csvContent = "FullName,QRCodeFilename\n";
+                    csvDataArray.forEach(function (data) {
+                        csvContent += `${data.FullName},${data.QRCodeFilename}\n`;
+                    });
+                    zip.file("qrcode_data.csv", csvContent);
+
+                    zip.generateAsync({ type: "blob" })
+                        .then(function (content) {
+                            var link = document.createElement('a');
+                            link.href = URL.createObjectURL(content);
+                            link.download = 'vcard_qrcodes.zip';
+                            link.click();
+                        });
                 };
 
                 reader.readAsText(file);
@@ -124,7 +230,63 @@ END:VCARD`;
             }
         }
 
-        // Function to convert data URL to Blob
+        function generateManualQR() {
+            var firstName = document.getElementById('firstName').value;
+            var lastName = document.getElementById('lastName').value;
+            var title = document.getElementById('title').value;
+            var url = document.getElementById('url').value;
+            var email = document.getElementById('email').value;
+            var workPhone = document.getElementById('workPhone').value;
+            var homePhone = document.getElementById('homePhone').value;
+            var street = document.getElementById('street').value;
+            var city = document.getElementById('city').value;
+            var state = document.getElementById('state').value;
+            var zipcode = document.getElementById('zipcode').value;
+            var country = document.getElementById('country').value;
+
+            var fullName = firstName + ' ' + lastName;
+
+            var vCardData = `BEGIN:VCARD
+VERSION:3.0
+FN:${fullName}
+N:${lastName};${firstName}
+TITLE:${title}
+URL:${url}
+EMAIL;TYPE=INTERNET:${email}
+TEL;TYPE=voice,work,pref:${workPhone}
+TEL;TYPE=voice,home,pref:${homePhone}
+ADR:;;${street};${city};${state};${zipcode};${country}
+END:VCARD`;
+
+            var qrSize = document.getElementById('qrSize').value || 300;
+
+            var qr = new QRious({
+                value: vCardData,
+                size: qrSize,
+            });
+
+            var qrPreviewCanvas = document.getElementById('qrPreview');
+            var ctx = qrPreviewCanvas.getContext('2d');
+            qrPreviewCanvas.width = qrSize;
+            qrPreviewCanvas.height = qrSize;
+            ctx.clearRect(0, 0, qrPreviewCanvas.width, qrPreviewCanvas.height);
+            ctx.drawImage(qr.image, 0, 0);
+
+            currentQR = qr.toDataURL();
+        }
+
+        function downloadQR() {
+            if (!currentQR) {
+                alert("Please generate a QR code first.");
+                return;
+            }
+            var format = document.getElementById('fileFormat').value;
+            var link = document.createElement('a');
+            link.href = currentQR;
+            link.download = `qrcode.${format}`;
+            link.click();
+        }
+
         function dataURLtoBlob(dataURL) {
             var arr = dataURL.split(',');
             var mime = arr[0].match(/:(.*?);/)[1];
