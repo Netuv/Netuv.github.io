@@ -7,39 +7,51 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            color: black;
         }
-
+        .sub-container {
+            background: #fff;
+            border: solid #000;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
         .container {
             text-align: center;
             padding: 20px;
-            background: white;
+            background: #f4f4f4;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             max-width: 600px;
             width: 100%;
         }
 
-        input[type="file"] {
+        input[type="file"], input[type="text"], input[type="radio"] {
             margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
 
         button {
-            background-color: #4CAF50;
+            background-color: black;
             color: white;
             border: none;
             padding: 10px 20px;
             cursor: pointer;
             border-radius: 5px;
+            transition: background-color 0.3s;
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: grey;
         }
 
         #status {
@@ -52,45 +64,51 @@
             margin: 20px 0;
         }
 
-        input[type="radio"] {
-            margin-right: 10px;
-        }
-
         #manualInput, #csvInput {
             display: none;
             margin: 20px 0;
         }
 
         .label-download {
-    color: rgb(0, 209, 157); /* Change link text color to white */
-    text-decoration: none; /* Optional: remove underline */
-}
-.footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 10px 0;
-}
+            color: black;
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid black;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
 
-a {
-    color: white; /* Change link text color to white */
-    text-decoration: none; /* Optional: remove underline */
-}
+        .label-download:hover {
+            background-color: black;
+            color: white;
+        }
 
-/* Optional: Change link color on hover */
-a:hover {
-    text-decoration: underline; /* Optional: underline on hover */
-}
+        .footer {
+            position: relative;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #f1f1f1;
+            color: black;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 20px;
+        }
 
+        a {
+            color: black;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Whatsapp QR Code Generator</h1>
+        <div class="sub-container">
         <label>
             <input type="radio" name="mode" value="manual" id="manualMode">
             Generate QR Code from single number
@@ -115,13 +133,16 @@ a:hover {
 
         <button id="generateBtn">Generate QR Codes</button>
         <h3>Download Sample Data</h3>
-    <a class="label-download" href="WA to QR data sample .csv" download="WA to QR data sample .csv">Download File</a>
+        <a class="label-download" href="WA to QR data sample .csv" download="WA to QR data sample .csv">Download File</a>
+    </div>
+    <p>Status : </p>
         <div id="status"></div>
-         <!-- Footer ============================================ -->
-  <div class="footer">
-    &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
-</div>
-<!-- End Footer ============================================ -->
+
+        <!-- Footer -->
+        <div class="footer">
+            &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
+        </div>
+        <!-- End Footer -->
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -181,7 +202,7 @@ a:hover {
                 link.click();
                 document.body.removeChild(link);
 
-                document.getElementById('status').innerText = 'Download ready!';
+                document.getElementById('status').innerText = 'Download Complete!';
                 console.log('ZIP file ready for download');
             } catch (error) {
                 document.getElementById('status').innerText = 'Error occurred.';
@@ -229,7 +250,7 @@ a:hover {
                 link.click();
                 document.body.removeChild(link);
 
-                document.getElementById('status').innerText = 'Download ready!';
+                document.getElementById('status').innerText = 'Download Complete!';
                 console.log('ZIP file ready for download');
             } catch (error) {
                 document.getElementById('status').innerText = 'Error occurred.';
