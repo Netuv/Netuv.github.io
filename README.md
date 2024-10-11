@@ -48,7 +48,7 @@ This project is licensed under the MIT License. See the LICENSE file for more de
 ## Contact & Support
 ***We Appreciate Your Support!*** 
 
-<a href="https://trakteer.id/netuv/tip" target="blank">
+<a href="https://trakteer.id/netuv/tip" target="_blank">
   <img src=https://trakteer-bedesk.s3.ap-southeast-1.amazonaws.com/storage/branding_media/lmWrnYB222t4UieTIowhHr44C1oDJkoSmtEVonF7.png alt="@netuv" width="200" />
 </a>
 
