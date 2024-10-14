@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Data Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            color: #000;
+        }
+.warning {
+color: red
+
+}
+        .container {
+            max-width: 95%;
+            max-height: 1200px; /* Set maximum height */
+            margin: 20px auto;
+            padding: 20px;
+            border: 2px solid #000;
+            border-radius: 5px;
+            background-color: #fff;
+            overflow: auto; /* Enable scrolling if content overflows */
+            resize: both; /* Allow resizing */
+            text-align: center;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #000;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        input[type="file"], button {
+            margin: 5px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #f0f0f0;
+            border: 1px solid #000;
+        }
+
+        button:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CSV Data Editor</h1>
+        <div class="controls">
+            <input type="file" id="fileInput" accept=".csv" />
+            <button id="saveBtn">Save CSV</button>
+            <button id="addRow">Add Row</button>
+            <button id="addCol">Add Column</button>
+            <button id="removeRow">Remove Row</button>
+            <button id="removeCol">Remove Column</button>
+            <button id="undoBtn">Undo</button>
+            <button id="redoBtn">Redo</button>
+        </div>
+        <table id="csvTable"></table>
+<p class="warning"> Use for Simple Data Only!</p>
+    </div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', loadCSV);
+        document.getElementById('saveBtn').addEventListener('click', saveCSV);
+        document.getElementById('addRow').addEventListener('click', addRow);
+        document.getElementById('addCol').addEventListener('click', addColumn);
+        document.getElementById('removeRow').addEventListener('click', removeRow);
+        document.getElementById('removeCol').addEventListener('click', removeColumn);
+        document.getElementById('undoBtn').addEventListener('click', undo);
+        document.getElementById('redoBtn').addEventListener('click', redo);
+
+        let csvData = [];
+        let history = JSON.parse(localStorage.getItem('csvHistory')) || [];
+        let historyIndex = history.length ? history.length - 1 : -1;
+
+        function loadCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                csvData = textToArray(e.target.result);
+                addHistory(csvData);
+                renderTable();
+            };
+            reader.readAsText(file);
+        }
+
+        function saveCSV() {
+            const csvContent = csvData.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function renderTable() {
+            const table = document.getElementById('csvTable');
+            table.innerHTML = '';
+
+            csvData.forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+                row.forEach((cell, colIndex) => {
+                    const td = document.createElement('td');
+                    td.contentEditable = true;
+                    td.textContent = cell;
+                    td.addEventListener('input', () => {
+                        csvData[rowIndex][colIndex] = td.textContent;
+                        addHistory(csvData);
+                    });
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+        }
+
+        function addRow() {
+            csvData.push(Array(csvData[0]?.length || 1).fill(''));
+            addHistory(csvData);
+            renderTable();
+        }
+
+        function addColumn() {
+            csvData.forEach(row => row.push(''));
+            addHistory(csvData);
+            renderTable();
+        }
+
+        function removeRow() {
+            if (csvData.length > 0) {
+                csvData.pop();
+                addHistory(csvData);
+                renderTable();
+            }
+        }
+
+        function removeColumn() {
+            if (csvData.length > 0 && csvData[0].length > 0) {
+                csvData.forEach(row => row.pop());
+                addHistory(csvData);
+                renderTable();
+            }
+        }
+
+        function textToArray(text) {
+            return text.split('\n').map(row => row.split(','));
+        }
+
+        function addHistory(state) {
+            if (historyIndex === history.length - 1) {
+                history.push(JSON.parse(JSON.stringify(state))); // Push current state
+            } else {
+                history = history.slice(0, historyIndex + 1); // Remove future states
+                history.push(JSON.parse(JSON.stringify(state))); // Push current state
+            }
+
+            if (history.length > 20) {
+                history.shift(); // Remove the oldest entry
+            }
+
+            historyIndex = history.length - 1;
+            localStorage.setItem('csvHistory', JSON.stringify(history)); // Save to local storage
+        }
+
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                csvData = history[historyIndex];
+                renderTable();
+            }
+        }
+
+        function redo() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                csvData = history[historyIndex];
+                renderTable();
+            }
+        }
+    </script>
+</body>
+</html>
