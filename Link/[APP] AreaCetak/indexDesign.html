@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator area cetak</title>
+    <title>Kalkulator Area Cetak dengan Preview</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
+            background-color: rgb(125, 125, 125);
+            margin: 0px;
             padding: 20px;
         }
         .container {
@@ -17,14 +17,14 @@
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 10px;
         }
         h1 {
             text-align: center;
-            color: #333;
+            color: rgb(51, 51, 51);
         }
         .input-group {
-            margin: 10px 0;
+            margin: 10px 0px;
         }
         label {
             display: block;
@@ -34,7 +34,7 @@
             width: 100%;
             padding: 8px;
             font-size: 16px;
-            border: 1px solid #ccc;
+            border: 1px solid rgb(204, 204, 204);
             border-radius: 4px;
         }
         button {
@@ -43,47 +43,52 @@
             padding: 10px;
             font-size: 16px;
             color: white;
-            background-color: #000000;
+            background-color: rgb(0, 0, 0);
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-top: 10px;
         }
         button:hover {
-            background-color: #424242;
+            background-color: rgb(66, 66, 66);
         }
         .result {
             margin-top: 20px;
         }
-        
-        .footer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+        .preview-container {
+            text-align: center;
+            margin-top: 20px;
+            display: block; /* Start by showing the preview */
+        }
+        #canvasPreview {
+            border: 1px solid #ccc;
+            background-color: #7d7d7d;
+            width: 100%;
+            height: auto;
+        }
+        .zoom-controls button {
+            margin: 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+	.footer {
             background-color: #333;
             color: white;
             text-align: center;
             padding: 10px 0;
-            z-index: 1000;
         }
-
-a {
-    color: white; /* Change link text color to white */
-    text-decoration: none; /* Optional: remove underline */
-}
-
-/* Optional: Change link color on hover */
-a:hover {
-    text-decoration: underline; /* Optional: underline on hover */
-}
+        a {
+            color: white;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Kalkulator Area Cetak</h1>
-        <h2>*Note:</h2>
-        <p>Potong Kotak : Jarak = 0, Margin = 0.4 </p>
-        <p>KissCut: Jarak = 0.2, Margin = 1.5 </p>
+<h2>*Note:</h2>
+        <p>Potong Kotak: Jarak = 0, Margin = 0.4</p>
+        <p>KissCut: Jarak = 0.2, Margin = 1.5</p>
         <p>DieCut: Jarak = 0.35, Margin = 1.5 (Kecuali Depok, Tanya Setter)</p>
         <p>--------------------------------------------------</p>
         <div class="input-group">
@@ -110,54 +115,119 @@ a:hover {
             <label for="margin">Margin Area Cetak (cm):</label>
             <input type="number" id="margin" value="1.5" step="0.1">
         </div>
-        <button onclick="calculate()">Hitung Desain</button>
+        
+        <button onclick="calculateAndDraw()">Hitung Desain</button>
+        
         <div class="result">
             <h2>Hasil Perhitungan</h2>
             <p>Orientasi Potret: <span id="portraitResult">0</span> desain</p>
             <p>Orientasi Lanskap: <span id="landscapeResult">0</span> desain</p>
         </div>
-        <!-- Footer ============================================ -->
- <div class="footer">
-    &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
-</div>
-<!-- End Footer ============================================ -->
-    </div>
-    <script>
-        function calculate() {
-            // Ambil ukuran kertas dari input
-            const widthA3 = parseFloat(document.getElementById('widthPaper').value);
-            const heightA3 = parseFloat(document.getElementById('heightPaper').value);
-            
-            // Ambil ukuran desain dari input
-            const widthDesign = parseFloat(document.getElementById('widthDesign').value);
-            const heightDesign = parseFloat(document.getElementById('heightDesign').value);
 
-            // Ambil jarak antar desain dari input
+        <button onclick="togglePreview()">Hide Preview</button>
+
+        <div class="preview-container" id="previewContainer">
+            <h2>Preview Layout</h2>
+            <canvas id="canvasPreview" width="400" height="600"></canvas>
+            <div class="zoom-controls">
+                <button onclick="zoomIn()">Zoom In</button>
+                <button onclick="zoomOut()">Zoom Out</button>
+            </div>
+        </div>
+<br>
+<br>
+<div class="footer">
+            &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvasPreview');
+        const ctx = canvas.getContext('2d');
+        const previewContainer = document.getElementById('previewContainer');
+        const toggleButton = document.querySelector('button[onclick="togglePreview()"]');
+        let scale = 1; // Starting scale
+
+        function calculateAndDraw() {
+            // Get input values
+            const paperWidth = parseFloat(document.getElementById('widthPaper').value);
+            const paperHeight = parseFloat(document.getElementById('heightPaper').value);
+            const designWidth = parseFloat(document.getElementById('widthDesign').value);
+            const designHeight = parseFloat(document.getElementById('heightDesign').value);
             const spacing = parseFloat(document.getElementById('spacing').value);
-            
-            // Ambil margin dari input
             const margin = parseFloat(document.getElementById('margin').value);
 
-            // Hitung ukuran area cetak dengan margin
-            const usableWidth = widthA3 - 2 * margin;
-            const usableHeight = heightA3 - 2 * margin;
+            // Calculate designs for portrait orientation
+            const portraitCols = Math.floor((paperWidth - 2 * margin + spacing) / (designWidth + spacing));
+            const portraitRows = Math.floor((paperHeight - 2 * margin + spacing) / (designHeight + spacing));
+            const portraitCount = portraitCols * portraitRows;
 
-            // Hitung untuk orientasi potret
-            const effectiveWidth = widthDesign + spacing;
-            const effectiveHeight = heightDesign + spacing;
+            // Calculate designs for landscape orientation
+            const landscapeCols = Math.floor((paperWidth - 2 * margin + spacing) / (designHeight + spacing));
+            const landscapeRows = Math.floor((paperHeight - 2 * margin + spacing) / (designWidth + spacing));
+            const landscapeCount = landscapeCols * landscapeRows;
 
-            const maxPortraitWidth = Math.floor(usableWidth / effectiveWidth);
-            const maxPortraitHeight = Math.floor(usableHeight / effectiveHeight);
-            const totalPortrait = maxPortraitWidth * maxPortraitHeight;
+            // Display results
+            document.getElementById('portraitResult').textContent = portraitCount;
+            document.getElementById('landscapeResult').textContent = landscapeCount;
 
-            // Hitung untuk orientasi lanskap
-            const maxLandscapeWidth = Math.floor(usableHeight / effectiveWidth);
-            const maxLandscapeHeight = Math.floor(usableWidth / effectiveHeight);
-            const totalLandscape = maxLandscapeWidth * maxLandscapeHeight;
+            // Draw layout for selected orientation
+            drawLayout(paperWidth, paperHeight, designWidth, designHeight, margin, spacing, portraitCols, portraitRows);
+        }
 
-            // Tampilkan hasil
-            document.getElementById('portraitResult').innerText = totalPortrait;
-            document.getElementById('landscapeResult').innerText = totalLandscape;
+        function drawLayout(paperWidth, paperHeight, designWidth, designHeight, margin, spacing, cols, rows) {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Set scale factor based on paper size to fit within canvas
+            const canvasMaxSize = 400;
+            const scaleFactor = Math.min(canvasMaxSize / paperWidth, canvasMaxSize / paperHeight) * scale;
+
+            // Draw paper area
+            const scaledPaperWidth = paperWidth * scaleFactor;
+            const scaledPaperHeight = paperHeight * scaleFactor;
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect((canvas.width - scaledPaperWidth) / 2, (canvas.height - scaledPaperHeight) / 2, scaledPaperWidth, scaledPaperHeight);
+            ctx.strokeStyle = '#000000';
+            ctx.strokeRect((canvas.width - scaledPaperWidth) / 2, (canvas.height - scaledPaperHeight) / 2, scaledPaperWidth, scaledPaperHeight);
+            
+            // Draw label for paper size
+            ctx.fillStyle = '#000000';
+            ctx.font = '16px Arial';
+            ctx.fillText(`${paperWidth}x${paperHeight}cm`, 10, 20);
+
+            // Draw designs within the paper area
+            ctx.fillStyle = '#4caf50';
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const x = (canvas.width - scaledPaperWidth) / 2 + margin * scaleFactor + col * (designWidth + spacing) * scaleFactor;
+                    const y = (canvas.height - scaledPaperHeight) / 2 + margin * scaleFactor + row * (designHeight + spacing) * scaleFactor;
+                    ctx.fillRect(x, y, designWidth * scaleFactor, designHeight * scaleFactor);
+                    ctx.strokeRect(x, y, designWidth * scaleFactor, designHeight * scaleFactor);
+                }
+            }
+        }
+
+        // Zoom functions
+        function zoomIn() {
+            scale *= 1.2;
+            calculateAndDraw();
+        }
+
+        function zoomOut() {
+            scale /= 1.2;
+            calculateAndDraw();
+        }
+
+        // Toggle preview visibility
+        function togglePreview() {
+            if (previewContainer.style.display === 'none') {
+                previewContainer.style.display = 'block';
+                toggleButton.textContent = 'Hide Preview';
+            } else {
+                previewContainer.style.display = 'none';
+                toggleButton.textContent = 'Show Preview';
+            }
         }
     </script>
 </body>
