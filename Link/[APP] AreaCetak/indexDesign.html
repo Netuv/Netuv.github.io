@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator area cetak</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            color: white;
+            background-color: #000000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #424242;
+        }
+        .result {
+            margin-top: 20px;
+        }
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+a {
+    color: white; /* Change link text color to white */
+    text-decoration: none; /* Optional: remove underline */
+}
+
+/* Optional: Change link color on hover */
+a:hover {
+    text-decoration: underline; /* Optional: underline on hover */
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kalkulator Area Cetak</h1>
+        <div class="input-group">
+            <label for="widthPaper">Lebar Kertas (cm):</label>
+            <input type="number" id="widthPaper" value="32">
+        </div>
+        <div class="input-group">
+            <label for="heightPaper">Tinggi Kertas (cm):</label>
+            <input type="number" id="heightPaper" value="48">
+        </div>
+        <div class="input-group">
+            <label for="widthDesign">Lebar Desain (cm):</label>
+            <input type="number" id="widthDesign" value="4">
+        </div>
+        <div class="input-group">
+            <label for="heightDesign">Tinggi Desain (cm):</label>
+            <input type="number" id="heightDesign" value="7">
+        </div>
+        <div class="input-group">
+            <label for="spacing">Jarak Antar Desain (cm):</label>
+            <input type="number" id="spacing" value="0.3" step="0.1">
+        </div>
+        <div class="input-group">
+            <label for="margin">Margin Area Cetak (cm):</label>
+            <input type="number" id="margin" value="1.5" step="0.1">
+        </div>
+        <button onclick="calculate()">Hitung Desain</button>
+        <div class="result">
+            <h2>Hasil Perhitungan</h2>
+            <p>Orientasi Potret: <span id="portraitResult">0</span> desain</p>
+            <p>Orientasi Lanskap: <span id="landscapeResult">0</span> desain</p>
+        </div>
+        <!-- Footer ============================================ -->
+ <div class="footer">
+    &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
+</div>
+<!-- End Footer ============================================ -->
+    </div>
+    <script>
+        function calculate() {
+            // Ambil ukuran kertas dari input
+            const widthA3 = parseFloat(document.getElementById('widthPaper').value);
+            const heightA3 = parseFloat(document.getElementById('heightPaper').value);
+            
+            // Ambil ukuran desain dari input
+            const widthDesign = parseFloat(document.getElementById('widthDesign').value);
+            const heightDesign = parseFloat(document.getElementById('heightDesign').value);
+
+            // Ambil jarak antar desain dari input
+            const spacing = parseFloat(document.getElementById('spacing').value);
+            
+            // Ambil margin dari input
+            const margin = parseFloat(document.getElementById('margin').value);
+
+            // Hitung ukuran area cetak dengan margin
+            const usableWidth = widthA3 - 2 * margin;
+            const usableHeight = heightA3 - 2 * margin;
+
+            // Hitung untuk orientasi potret
+            const effectiveWidth = widthDesign + spacing;
+            const effectiveHeight = heightDesign + spacing;
+
+            const maxPortraitWidth = Math.floor(usableWidth / effectiveWidth);
+            const maxPortraitHeight = Math.floor(usableHeight / effectiveHeight);
+            const totalPortrait = maxPortraitWidth * maxPortraitHeight;
+
+            // Hitung untuk orientasi lanskap
+            const maxLandscapeWidth = Math.floor(usableHeight / effectiveWidth);
+            const maxLandscapeHeight = Math.floor(usableWidth / effectiveHeight);
+            const totalLandscape = maxLandscapeWidth * maxLandscapeHeight;
+
+            // Tampilkan hasil
+            document.getElementById('portraitResult').innerText = totalPortrait;
+            document.getElementById('landscapeResult').innerText = totalLandscape;
+        }
+    </script>
+</body>
+</html>
