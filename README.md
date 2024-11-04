@@ -38,17 +38,13 @@ For any questions or suggestions, feel free to open an issue in the GitHub repos
 - Text List to QR Code Generator
 - PDF manipulation tool! It allows users to reverse PDF pages in specified chunks and provides a preview of the output.
 - Generate many Whatsapp Number to QR Code at once!
-  
+- Preview Print/Design on Paper with Size Customizer
 *******************************************************************************
 
 ## Usage
 
 -   To manage CSV files, simply upload your CSV file using the provided interface. You can view, edit, and download your CSV data.
 -   For QR code generation, enter the desired text or URL in the input field and click the generate button. Your QR code will be displayed for download.
-
-## Contributing
-
-Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.
 
 ## License
 
