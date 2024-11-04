@@ -76,7 +76,7 @@ a {
 <div class="container">
     <h2>Book Spine Calculator</h2>
     <div class="instructions">Select paper type and enter the number of pages.</div>
-    <input id="display" type="text" name="display" readonly placeholder="Total Thickness (cm)" style="background-color: #e9ecef;">
+    <input id="display" type="text" name="display" readonly placeholder="Total Thickness | Ketebalan (cm)" style="background-color: #e9ecef;">
 
     <select id="paperSelect" onchange="autofillQuantity()">
         <option value="">Select Paper</option>
@@ -95,7 +95,7 @@ a {
         <option value="0.012">Bookpaper</option>
     </select>
 
-    <input type="number" id="numberInput" placeholder="Enter number of pages" min="1">
+    <input type="number" id="numberInput" placeholder="Enter number of pages | Total Halaman" min="1">
     
     <input type="button" value="Calculate" onclick="calculate()">
     <input type="button" value="Clear" onclick="clearDisplay()">
