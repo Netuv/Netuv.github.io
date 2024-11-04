@@ -39,6 +39,7 @@ For any questions or suggestions, feel free to open an issue in the GitHub repos
 - PDF manipulation tool! It allows users to reverse PDF pages in specified chunks and provides a preview of the output.
 - Generate many Whatsapp Number to QR Code at once!
 - Preview Print/Design on Paper with Size Customizer
+- Book Spine Thickness Calculator
 *******************************************************************************
 
 ## Usage
