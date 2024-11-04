@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Book Spine Size Calculator</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 350px;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #000000;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        input[type="button"] {
+            background-color: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        .footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+a {
+    color: white; /* Change link text color to white */
+    text-decoration: none; /* Optional: remove underline */
+}
+        input[type="button"]:hover {
+            background-color: #414141;
+        }
+        .instructions {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Book Spine Calculator</h2>
+    <div class="instructions">Select paper type and enter the number of pages.</div>
+    <input id="display" type="text" name="display" readonly placeholder="Total Thickness (cm)" style="background-color: #e9ecef;">
+
+    <select id="paperSelect" onchange="autofillQuantity()">
+        <option value="">Select Paper</option>
+        <option value="0.0131">Art Paper 120gsm</option>
+        <option value="0.0142">Art Paper 150gsm</option>
+        <option value="0.0131">Matte Paper 120gsm</option>
+        <option value="0.0142">Matte Paper 150gsm</option>
+        <option value="0.05">Art Carton 400gsm</option>
+        <option value="0.036">Art Carton 310gsm</option>
+        <option value="0.03125">Art Carton 260gsm</option>
+        <option value="0.025">Art Carton 230gsm</option>
+        <option value="0.023">Art Carton 210gsm</option>
+        <option value="0.0093">HVS 75gsm</option>
+        <option value="0.01041">HVS 80gsm</option>
+        <option value="0.01234">HVS 100gsm</option>
+        <option value="0.012">Bookpaper</option>
+    </select>
+
+    <input type="number" id="numberInput" placeholder="Enter number of pages" min="1">
+    
+    <input type="button" value="Calculate" onclick="calculate()">
+    <input type="button" value="Clear" onclick="clearDisplay()">
+<br>
+    <div class="footer">
+            &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
+        </div>
+<!-- <h4>Spiral Number by Centimeter ( Max 3cm )</h4>
+<p>
+> 0,5cm Number 5
+<br>> 0,7cm Number 6
+<br>> 0,8cm Number 7
+<br>> 0,9cm Number 8
+<br>> 1,1cm Number 9
+<br>> 1,3cm Number 10
+<br>> 1,6cm Number 12
+<br>> 1,8cm Number 14
+<br>> 2,1cm Number 16
+<br>> 2,6cm Number 20
+</p> -->
+
+</div>
+
+<script>
+    function autofillQuantity() {
+        const select = document.getElementById('paperSelect');
+        const quantityInput = document.getElementById('numberInput');
+
+        // Remove default quantity settings
+        // Default setting removed; user must enter the number of pages
+        quantityInput.value = ''; // Clear if paper selected
+    }
+
+    function calculate() {
+        const select = document.getElementById('paperSelect');
+        const value = select.value;
+        const quantity = document.getElementById('numberInput').value;
+
+        if (value && quantity) {
+            const total = (value * quantity).toFixed(4);
+            document.getElementById('display').value = total + ' cm';
+        } else {
+            alert('Please select paper and enter the number of pages.');
+        }
+    }
+
+    function clearDisplay() {
+        document.getElementById('display').value = '';
+        document.getElementById('numberInput').value = '';
+        document.getElementById('paperSelect').selectedIndex = 0; // Reset dropdown
+    }
+</script>
+
+</body>
+</html>
