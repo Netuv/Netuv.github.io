@@ -70,6 +70,7 @@
         }
         .preview-box {
             text-align: center;
+            position: relative;
         }
         .preview-box h3 {
             margin-top: 0;
@@ -78,9 +79,18 @@
         }
         canvas {
             border: 1px solid #ccc;
-            background-color: #7d7d7d;
+            background-color: #f0f0f0;
             width: 100%;
             height: auto;
+        }
+        .resize-handle {
+            width: 10px;
+            height: 10px;
+            background-color: #333;
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            cursor: se-resize;
         }
         .footer {
             background-color: #333;
@@ -93,16 +103,12 @@
             text-decoration: none;
         }
     </style>
+    <!-- Include Konva.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/konva@8.0.3/konva.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Kalkulator Area Cetak</h1>
-        <h2>*Note A3+:</h2>
-        <p>Potong Kotak: Uk.Kertas: 48x32cm, Jarak = 0, Margin = 0.4</p>
-        <p>KissCut: Uk.Kertas: 48x32, Jarak = 0.2, Margin = 1.5</p>
-        <p>DieCut: Uk.Kertas: 48x32, Jarak = 0.35, Margin = 1.5</p>
-        <p>Diecut Depok = Uk.Kertas: 43x28.7cm, Jarak = 0.35, Margin = 0.4</p>
-        <p>--------------------------------------------------</p>
         <div class="input-group">
             <label for="widthPaper">Lebar Kertas (cm):</label>
             <input type="number" id="widthPaper" value="48">
@@ -129,31 +135,72 @@
         </div>
         
         <button onclick="calculateAndDraw()">Hitung Desain</button>
-        
         <div class="result">
             <p>Orientasi Potret: <span id="portraitResult">0</span> desain</p>
             <p>Orientasi Lanskap: <span id="landscapeResult">0</span> desain</p>
         </div>
 
+<p>Hint: Klik Objek dan edit posisi objek, Jika dirasa preview terlalu kecil 
+geser kotak hitam kecil pada area preview ke Kanan/bawah dan klik Hitung lagi</p>
+
+        <br>
+        <button onclick="copySelected()">Copy</button>
+        <button onclick="rotateSelected()">Rotate</button>
+        <button onclick="deleteSelected()">Delete</button>
+
         <div class="preview-container">
             <div class="preview-box" id="mainPreview">
                 <h3>Preview</h3>
-                <canvas id="mainCanvas" width="300" height="200"></canvas>
+                <div id="previewCanvas"></div>
+                <div class="resize-handle" id="resizeHandle"></div>
             </div>
         </div>
-        <br>
-        <br>
-<div class="footer">
+<br>
+<br>
+<br>
+        <div class="footer">
             &copy; <a href="https://www.github.com/netuv" target="_blank">2024 Arghi M. S.</a>
         </div>
     </div>
 
-    </div>
-
     <script>
-        const mainCanvas = document.getElementById('mainCanvas');
-        const mainCtx = mainCanvas.getContext('2d');
+        let stage, layer;
+        let selectedDesign = null;
 
+        // Initialize Konva canvas
+        function initializeCanvas() {
+            stage = new Konva.Stage({
+                container: 'previewCanvas',
+                width: 500,
+                height: 300
+            });
+
+            layer = new Konva.Layer();
+            stage.add(layer);
+
+            stage.on('click', function(e) {
+                // Check if a design is clicked
+                const clickedNode = e.target;
+                if (clickedNode && clickedNode.getClassName() === 'Rect') {
+                    // Select the clicked design
+                    if (selectedDesign) {
+                        selectedDesign.stroke('black'); // Reset previous selection
+                    }
+                    selectedDesign = clickedNode;
+                    selectedDesign.stroke('red'); // Highlight the selected design
+                    layer.batchDraw();
+                } else {
+                    // Deselect any design
+                    if (selectedDesign) {
+                        selectedDesign.stroke('black');
+                        selectedDesign = null;
+                        layer.batchDraw();
+                    }
+                }
+            });
+        }
+
+        // Calculate and draw designs
         function calculateAndDraw() {
             const paperWidth = parseFloat(document.getElementById('widthPaper').value);
             const paperHeight = parseFloat(document.getElementById('heightPaper').value);
@@ -173,35 +220,137 @@
             document.getElementById('portraitResult').textContent = portraitCount;
             document.getElementById('landscapeResult').textContent = landscapeCount;
 
+            // Clear the layer before redrawing
+            layer.destroyChildren();
+
+            // Draw the layout based on the best orientation
             if (portraitCount >= landscapeCount) {
-                drawLayout(mainCtx, paperWidth, paperHeight, designWidth, designHeight, margin, spacing, portraitCols, portraitRows);
+                drawLayout(paperWidth, paperHeight, designWidth, designHeight, margin, spacing, portraitCols, portraitRows);
             } else {
-                drawLayout(mainCtx, paperWidth, paperHeight, designHeight, designWidth, margin, spacing, landscapeCols, landscapeRows);
+                drawLayout(paperWidth, paperHeight, designHeight, designWidth, margin, spacing, landscapeCols, landscapeRows);
             }
+
+            layer.draw();
         }
 
-        function drawLayout(ctx, paperWidth, paperHeight, designWidth, designHeight, margin, spacing, cols, rows) {
-            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-            const scaleFactor = Math.min(ctx.canvas.width / paperWidth, ctx.canvas.height / paperHeight);
-
+        // Draw the layout with design rectangles
+        function drawLayout(paperWidth, paperHeight, designWidth, designHeight, margin, spacing, cols, rows) {
+            const scaleFactor = Math.min(stage.width() / paperWidth, stage.height() / paperHeight);
             const scaledPaperWidth = paperWidth * scaleFactor;
             const scaledPaperHeight = paperHeight * scaleFactor;
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect((ctx.canvas.width - scaledPaperWidth) / 2, (ctx.canvas.height - scaledPaperHeight) / 2, scaledPaperWidth, scaledPaperHeight);
-            ctx.strokeStyle = '#000000';
-            ctx.strokeRect((ctx.canvas.width - scaledPaperWidth) / 2, (ctx.canvas.height - scaledPaperHeight) / 2, scaledPaperWidth, scaledPaperHeight);
-            
-            ctx.fillStyle = '#4caf50';
+
+            // Draw the paper area as a rectangle (background)
+            const paperRect = new Konva.Rect({
+                x: (stage.width() - scaledPaperWidth) / 2,
+                y: (stage.height() - scaledPaperHeight) / 2,
+                width: scaledPaperWidth,
+                height: scaledPaperHeight,
+                fill: '#FFFFFF',
+                stroke: '#000000',
+                strokeWidth: 2
+            });
+
+            layer.add(paperRect);
+
+            // Draw the designs as rectangles on the canvas
             for (let row = 0; row < rows; row++) {
                 for (let col = 0; col < cols; col++) {
-                    const x = (ctx.canvas.width - scaledPaperWidth) / 2 + margin * scaleFactor + col * (designWidth + spacing) * scaleFactor;
-                    const y = (ctx.canvas.height - scaledPaperHeight) / 2 + margin * scaleFactor + row * (designHeight + spacing) * scaleFactor;
-                    ctx.fillRect(x, y, designWidth * scaleFactor, designHeight * scaleFactor);
-                    ctx.strokeRect(x, y, designWidth * scaleFactor, designHeight * scaleFactor);
+                    const x = (stage.width() - scaledPaperWidth) / 2 + margin * scaleFactor + col * (designWidth + spacing) * scaleFactor;
+                    const y = (stage.height() - scaledPaperHeight) / 2 + margin * scaleFactor + row * (designHeight + spacing) * scaleFactor;
+
+                    const rect = new Konva.Rect({
+                        x: x,
+                        y: y,
+                        width: designWidth * scaleFactor,
+                        height: designHeight * scaleFactor,
+                        fill: '#4caf50',
+                        stroke: 'black',
+                        strokeWidth: 1,
+                        draggable: true,
+                        name: 'design'
+                    });
+
+                    rect.on('dragmove', function () {
+                        selectedDesign = this; // Update selected design
+                    });
+
+                    layer.add(rect);
                 }
             }
         }
+
+        // Copy the selected design
+        function copySelected() {
+            if (selectedDesign) {
+                const clone = selectedDesign.clone();
+                const offset = 10; // Small offset to prevent overlap
+                clone.setAttrs({
+                    x: selectedDesign.x() + offset,
+                    y: selectedDesign.y() + offset
+                });
+                layer.add(clone);
+                layer.batchDraw();
+            }
+        }
+
+        // Rotate the selected design
+        function rotateSelected() {
+            if (selectedDesign) {
+                const angle = selectedDesign.rotation() + 90;
+                selectedDesign.rotation(angle);
+                layer.batchDraw();
+            }
+        }
+
+        // Delete the selected design
+        function deleteSelected() {
+            if (selectedDesign) {
+                selectedDesign.destroy();
+                layer.batchDraw();
+                selectedDesign = null;
+            }
+        }
+
+        // Handle resizing of the preview container
+        let isResizing = false;
+
+        const resizeHandle = document.getElementById('resizeHandle');
+        const previewCanvas = document.getElementById('mainPreview');
+        
+        resizeHandle.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            const initialWidth = previewCanvas.offsetWidth;
+            const initialHeight = previewCanvas.offsetHeight;
+            const initialX = e.clientX;
+            const initialY = e.clientY;
+
+            document.addEventListener('mousemove', resize);
+            document.addEventListener('mouseup', stopResizing);
+
+            function resize(e) {
+                if (!isResizing) return;
+                const widthDiff = e.clientX - initialX;
+                const heightDiff = e.clientY - initialY;
+
+                previewCanvas.style.width = initialWidth + widthDiff + 'px';
+                previewCanvas.style.height = initialHeight + heightDiff + 'px';
+
+                // Update Konva stage size
+                stage.width(previewCanvas.offsetWidth);
+                stage.height(previewCanvas.offsetHeight);
+            }
+
+            function stopResizing() {
+                isResizing = false;
+                document.removeEventListener('mousemove', resize);
+                document.removeEventListener('mouseup', stopResizing);
+            }
+        });
+
+        // Initialize the canvas when the page loads
+        window.onload = function() {
+            initializeCanvas();
+        };
     </script>
 </body>
 </html>
