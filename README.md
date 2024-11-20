@@ -49,4 +49,4 @@ For any questions or suggestions, feel free to open an issue in the GitHub repos
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for more details.
+This project is licensed under the GNU General Public License v3.0 License. See the LICENSE file for more details.
